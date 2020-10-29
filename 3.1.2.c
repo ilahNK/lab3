@@ -55,7 +55,7 @@ void sigint()
 
 void sigquit()
 
-{ printf("Hahaha This is a special signal handler for SIGGUIT\n");
+{ printf("This is a special signal handler for SIGGUIT\n");
   exit(0);
 }
 
