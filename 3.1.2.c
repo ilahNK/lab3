@@ -1,62 +1,54 @@
 #include <stdio.h>
-#include <signal.h>
-#include <errno.h>
 #include <stdlib.h>
-#include <unistd.h>
-
-
-void sighup(); 
-void sigint();
-void sigquit();
+#include <errno.h>
+#include <signal.h>
 
 int main(void)
 {
- int pid;
 
+  void sigint_handler(int sig);
+  void sigtstp_handler(int sig);
+  void sigquit_handler(int sig);
   
-   if ((pid = fork()) < 0) {
-        perror("fork");
-        exit(1);
-    }
-    
-   if (pid == 0)
-     {
-       signal(SIGHUP,sighup); /* set function calls */
-       signal(SIGINT,sigint);
-       signal(SIGQUIT, sigquit);
-       for(;;);
-     }
-  else 
-     {
-       printf("\nPARENT: sending SIGHUP\n\n");
-       kill(pid,SIGHUP);
-     
-       printf("\nPARENT: sending SIGINT\n\n");
-       kill(pid,SIGINT);
-       
-       printf("\nPARENT: sending SIGQUIT\n\n");
-       kill(pid,SIGQUIT);
-  
-     }
-return 0;
+  char s[200];
+
+  if (signal(SIGINT, sigint_handler) == SIG_ERR)
+  {
+     perror("signal");
+     exit(1);
+  }
+  else if (signal(SIGTSTP, sigtstp_handler) == SIG_ERR)
+  {
+     perror("signal");
+     exit(1);
+  }
+  else if (signal(SIGQUIT, sigquit_handler) == SIG_ERR)
+  {
+     perror("signal");
+     exit(1);
+  }
+
+  printf("Enter a string:\n");
+
+  if (fgets(s, 200, stdin) == NULL)
+      perror("gets");
+  else
+      printf("you entered: %s\n", s);
+
+  return 0;
 }
 
-void sighup()
-
-{  signal(SIGHUP,sighup);
-   printf("CHILD:This is a special signal handler for SIGHUP\n");
+void sigint_handler(int sig)
+{
+  printf("This is a special signal handler for SIGINT \n");
 }
-
-void sigint()
-
-{  signal(SIGINT,sigint); 
-   printf("CHILD:This is a special signal handler for SIGINT\n");
+void sigtstp_handler(int sig)
+{
+  printf("This is a special signal handler for SIGTSTP\n");
 }
-
-void sigquit()
-
-{ printf("This is a special signal handler for SIGGUIT\n");
-  exit(0);
+void sigquit_handler(int sig)
+{
+  printf("This is a special signal handler for SIGQUIT \n");
 }
 
 
